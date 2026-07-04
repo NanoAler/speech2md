@@ -8,7 +8,7 @@ from speech2md.core.config import get_output_dir
 from speech2md.core.config import load as load_config
 from speech2md.core.export import write_markdown
 from speech2md.core.models import Job, JobMode, JobStatus
-from speech2md.core.postprocess.formatter import format_text
+from speech2md.core.postprocess.formatter import format_long_text
 from speech2md.core.postprocess.llm_client import create_client
 from speech2md.core.stt.whisper_engine import WhisperTranscriber
 
@@ -45,6 +45,7 @@ def run_file_job(
             model_size=settings.whisper_model,
             device=settings.device,
             compute_type=settings.compute_type,
+            beam_size=settings.beam_size,
         )
         result = transcriber.transcribe(audio_path, language=job.language)
 
@@ -62,13 +63,17 @@ def run_file_job(
                     model=settings.llm_model,
                     api_key=settings.llm_api_key,
                     timeout=settings.llm_timeout,
+                    max_tokens=settings.llm_max_tokens,
                 )
                 prompt_template = (
                     settings.prompt_template_ru
                     if job.language == "ru"
                     else settings.prompt_template_en
                 )
-                formatted = format_text(result.full_text, llm, job.language, prompt_template)
+                formatted = format_long_text(
+                    result.full_text, llm, job.language, prompt_template,
+                    chunk_size=settings.chunk_size, overlap=settings.overlap,
+                )
                 result.full_text = formatted
             except Exception as exc:
                 logger.warning("LLM post-processing skipped: %s", exc)

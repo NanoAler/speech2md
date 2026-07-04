@@ -14,11 +14,13 @@ class WhisperTranscriber(Transcriber):
         model_size: str = "small",
         device: Device | str = Device.cpu,
         compute_type: str = "int8",
+        beam_size: int = 5,
         cache_dir: Path | None = None,
     ) -> None:
         self.model_size = model_size
         self.device = Device(device) if isinstance(device, str) else device
         self.compute_type = compute_type
+        self.beam_size = beam_size
         self._model: WhisperModel | None = None
 
     @property
@@ -32,7 +34,7 @@ class WhisperTranscriber(Transcriber):
         return self._model
 
     def transcribe(self, audio_path: str | Path, language: str = "") -> TranscriptionResult:
-        segments_gen, info = self.model.transcribe(str(audio_path), language=language or None, beam_size=5)
+        segments_gen, info = self.model.transcribe(str(audio_path), language=language or None, beam_size=self.beam_size)
 
         segments: list[Segment] = []
         full_text_parts: list[str] = []

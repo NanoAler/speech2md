@@ -78,6 +78,11 @@ class Settings(BaseModel):
         "Format the text as Markdown. Preserve speech structure.\n\n{text}"
     )
 
+    llm_max_tokens: int = 0
+
+    chunk_size: int = 2000
+    overlap: int = 200
+
     output_dir: str = ""
     vad_threshold: float = 0.5
     vad_min_speech_duration: float = 0.5

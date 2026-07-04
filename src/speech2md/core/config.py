@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import tomllib
 from pathlib import Path
 
@@ -14,10 +15,20 @@ CONFIG_FILE = CONFIG_DIR / "config.toml"
 
 def load() -> Settings:
     if not CONFIG_FILE.exists():
-        return Settings()
-    raw = CONFIG_FILE.read_bytes()
-    data = tomllib.loads(raw.decode("utf-8"))
-    return Settings(**data)
+        settings = Settings()
+    else:
+        raw = CONFIG_FILE.read_bytes()
+        data = tomllib.loads(raw.decode("utf-8"))
+        settings = Settings(**data)
+
+    if not settings.llm_api_key:
+        settings.llm_api_key = os.environ.get("OPENAI_API_KEY", "")
+    if settings.llm_backend.value == "openai":
+        settings.llm_url = os.environ.get("OPENAI_BASE_URL", settings.llm_url)
+    elif settings.llm_backend.value == "ollama":
+        settings.llm_url = os.environ.get("OLLAMA_URL", settings.llm_url)
+
+    return settings
 
 
 def save(settings: Settings) -> None:

@@ -1,0 +1,32 @@
+from __future__ import annotations
+
+import tomllib
+from pathlib import Path
+
+import tomli_w
+from platformdirs import user_config_dir
+
+from speech2md.core.models import Settings
+
+CONFIG_DIR = Path(user_config_dir("speech2md", ensure_exists=True))
+CONFIG_FILE = CONFIG_DIR / "config.toml"
+
+
+def load() -> Settings:
+    if not CONFIG_FILE.exists():
+        return Settings()
+    raw = CONFIG_FILE.read_bytes()
+    data = tomllib.loads(raw.decode("utf-8"))
+    return Settings(**data)
+
+
+def save(settings: Settings) -> None:
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+    raw = settings.model_dump()
+    CONFIG_FILE.write_text(tomli_w.dumps(raw), encoding="utf-8")
+
+
+def get_output_dir(settings: Settings) -> Path:
+    if settings.output_dir:
+        return Path(settings.output_dir)
+    return Path(user_config_dir("speech2md", ensure_exists=True)) / "output"

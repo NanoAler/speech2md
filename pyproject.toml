@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "speech2md"
+version = "0.1.0"
+description = "Speech-to-text with LLM post-processing, exporting to Markdown"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "speech2md contributors"},
+]
+
+dependencies = [
+    "faster-whisper>=1.1.0",
+    "pydantic>=2.0",
+    "httpx>=0.27.0",
+    "platformdirs>=4.0",
+    "tomli-w>=1.0",
+    "typing-extensions>=4.9",
+]
+
+[project.optional-dependencies]
+cli = [
+    "typer>=0.12",
+    "rich>=13.0",
+]
+gui = [
+    "PyGObject>=3.48",
+]
+realtime = [
+    "sounddevice>=0.5",
+    "silero-vad>=3.1",
+    "onnxruntime>=1.18",
+]
+cuda = [
+    "faster-whisper[cuda]>=1.1.0",
+    "onnxruntime-gpu>=1.18",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+speech2md = "speech2md.cli.app:app"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+namespace_packages = true
+ignore_missing_imports = true
+cache_dir = ".mypy_cache"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.hatch.build]
+packages = ["src/speech2md"]
